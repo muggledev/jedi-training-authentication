@@ -1,4 +1,5 @@
 from flask import jsonify, request
+
 from db import db
 from models.courses import Courses, course_schema, courses_schema
 from util.reflection import populate_object
@@ -8,10 +9,10 @@ from lib.authenticate import authenticate, require_force_rank
 @authenticate
 @require_force_rank("Master")
 def create_course():
-    data = request.get_json() or request.form
+    post_data = request.form if request.form else request.json
 
-    course = Courses()
-    populate_object(course, data)
+    course = Courses.new_course_obj()
+    populate_object(course, post_data)
 
     try:
         db.session.add(course)
@@ -40,15 +41,15 @@ def get_courses_by_difficulty(difficulty_level):
 
 @authenticate
 def update_course(course_id):
-    course = Courses.query.get(course_id)
+    post_data = request.form if request.form else request.json
+    course = db.session.query(Courses).filter(Courses.course_id == course_id).first()
     if not course:
         return jsonify({"message": "course not found"}), 404
 
     if request.user.user_id != course.instructor_id and request.user.force_rank not in ["Council", "Grand Master"]:
         return jsonify({"message": "not authorized"}), 403
 
-    data = request.get_json() or request.form
-    populate_object(course, data)
+    populate_object(course, post_data)
     db.session.commit()
 
     return jsonify({"message": "course updated", "course": course_schema.dump(course)}), 200

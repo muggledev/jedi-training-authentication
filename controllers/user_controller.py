@@ -7,10 +7,10 @@ from lib.authenticate import authenticate, require_force_rank
 
 
 def create_user():
-    data = request.get_json() or request.form
+    post_data = request.form if request.form else request.json
 
-    new_user = Users()
-    populate_object(new_user, data)
+    new_user = Users.new_user_obj()
+    populate_object(new_user, post_data)
 
     if not new_user.password:
         return jsonify({"message": "password required"}), 400
@@ -30,8 +30,8 @@ def create_user():
     return jsonify({"message": "user created", "user": user_schema.dump(new_user)}), 201
 
 
-@authenticate
 @require_force_rank("Council")
+@authenticate
 def get_all_users():
     users = Users.query.all()
     return jsonify({"users": users_schema.dump(users)}), 200
@@ -53,19 +53,18 @@ def get_user_by_id(user_id):
 
 @authenticate
 def update_user(user_id):
-    user = Users.query.get(user_id)
+    post_data = request.form if request.form else request.json
+    user = db.session.query(Users).filter(Users.user_id == user_id).first()
     if not user:
         return jsonify({"message": "user not found"}), 404
 
     if str(request.user.user_id) != user_id and request.user.force_rank not in ["Council", "Grand Master"]:
         return jsonify({"message": "not authorized"}), 403
 
-    data = request.get_json() or request.form
+    if "password" in post_data:
+        post_data["password"] = generate_password_hash(post_data["password"]).decode("utf8")
 
-    if "password" in data:
-        data["password"] = generate_password_hash(data["password"]).decode("utf8")
-
-    populate_object(user, data)
+    populate_object(user, post_data)
     db.session.commit()
 
     return jsonify({"message": "user updated", "user": user_schema.dump(user)}), 200

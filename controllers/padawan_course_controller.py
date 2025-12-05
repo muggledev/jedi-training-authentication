@@ -8,10 +8,10 @@ from lib.authenticate import authenticate, require_force_rank
 @authenticate
 @require_force_rank("Master")
 def enroll_padawan():
-    data = request.get_json() or request.form
+    post_data = request.form if request.form else request.json
 
     enrollment = PadawanCourses()
-    populate_object(enrollment, data)
+    populate_object(enrollment, post_data)
 
     try:
         db.session.add(enrollment)
@@ -46,16 +46,16 @@ def get_enrollment(padawan_id, course_id):
 @authenticate
 @require_force_rank("Master")
 def update_enrollment(padawan_id, course_id):
-    enrollment = PadawanCourses.query.filter_by(
-        padawan_id=padawan_id,
-        course_id=course_id
-    ).first()
+    post_data = request.form if request.form else request.json
+    enrollment = (
+        db.session.query(PadawanCourses).filter(
+            PadawanCourses.padawan_id == padawan_id,
+            PadawanCourses.course_id == course_id).first())
 
     if not enrollment:
         return jsonify({"message": "enrollment not found"}), 404
 
-    data = request.get_json() or request.form
-    populate_object(enrollment, data)
+    populate_object(enrollment, post_data)
     db.session.commit()
 
     return jsonify({"message": "enrollment updated", "enrollment": enrollment_schema.dump(enrollment)}), 200

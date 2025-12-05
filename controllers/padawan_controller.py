@@ -9,10 +9,10 @@ from lib.authenticate import authenticate, require_force_rank
 @authenticate
 @require_force_rank("Master")
 def create_padawan():
-    data = request.get_json() or request.form
+    post_data = request.form if request.form else request.json
 
-    padawan = Padawans()
-    populate_object(padawan, data)
+    padawan = Padawans.new_padawan_obj()
+    populate_object(padawan, post_data)
 
     try:
         db.session.add(padawan)
@@ -41,15 +41,15 @@ def get_padawan(padawan_id):
 
 @authenticate
 def update_padawan(padawan_id):
-    padawan = Padawans.query.get(padawan_id)
+    post_data = request.form if request.form else request.json
+    padawan = db.session.query(Padawans).filter(Padawans.padawan_id == padawan_id).first()
     if not padawan:
         return jsonify({"message": "padawan not found"}), 404
 
     if request.user.force_rank not in ["Council", "Grand Master"] and request.user.user_id != padawan.master_id:
         return jsonify({"message": "not authorized"}), 403
 
-    data = request.get_json() or request.form
-    populate_object(padawan, data)
+    populate_object(padawan, post_data)
     db.session.commit()
 
     return jsonify({"message": "padawan updated", "padawan": padawan_schema.dump(padawan)}), 200

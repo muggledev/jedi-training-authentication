@@ -8,10 +8,10 @@ from lib.authenticate import authenticate, require_force_rank
 @authenticate
 @require_force_rank("Master")
 def create_crystal():
-    data = request.get_json() or request.form
+    post_data = request.form if request.form else request.json
 
-    crystal = Crystals()
-    populate_object(crystal, data)
+    crystal = Crystals.new_crystal_obj()
+    populate_object(crystal, post_data)
 
     try:
         db.session.add(crystal)
@@ -41,12 +41,12 @@ def get_crystals_by_rarity(rarity_level):
 @authenticate
 @require_force_rank("Master")
 def update_crystal(crystal_id):
-    crystal = Crystals.query.get(crystal_id)
+    post_data = request.form if request.form else request.json
+    crystal = db.session.query(Crystals).filter(Crystals.crystal_id == crystal_id).first()
     if not crystal:
         return jsonify({"message": "crystal not found"}), 404
 
-    data = request.get_json() or request.form
-    populate_object(crystal, data)
+    populate_object(crystal, post_data)
     db.session.commit()
 
     return jsonify({"message": "crystal updated", "crystal": crystal_schema.dump(crystal)}), 200

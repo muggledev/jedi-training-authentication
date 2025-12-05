@@ -8,10 +8,10 @@ from lib.authenticate import authenticate, require_force_rank
 @authenticate
 @require_force_rank("Padawan")
 def create_lightsaber():
-    data = request.get_json() or request.form
+    post_data = request.form if request.form else request.json
 
-    saber = Lightsabers()
-    populate_object(saber, data)
+    saber = Lightsabers.new_lightsaber_obj()
+    populate_object(saber, post_data)
 
     try:
         db.session.add(saber)
@@ -40,15 +40,15 @@ def get_lightsabers_by_owner(owner_id):
 
 @authenticate
 def update_lightsaber(saber_id):
-    saber = Lightsabers.query.get(saber_id)
+    post_data = request.form if request.form else request.json
+    saber = db.session.query(Lightsabers).filter(Lightsabers.saber_id == saber_id).first()
     if not saber:
         return jsonify({"message": "lightsaber not found"}), 404
 
     if request.user.force_rank not in ["Council", "Grand Master"] and request.user.user_id != saber.owner_id:
         return jsonify({"message": "not authorized"}), 403
 
-    data = request.get_json() or request.form
-    populate_object(saber, data)
+    populate_object(saber, post_data)
     db.session.commit()
 
     return jsonify({"message": "lightsaber updated", "lightsaber": lightsaber_schema.dump(saber)}), 200

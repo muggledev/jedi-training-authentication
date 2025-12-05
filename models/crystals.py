@@ -14,6 +14,15 @@ class Crystals(db.Model):
     rarity_level = db.Column(db.String(), nullable=False)
     force_amplify = db.Column(db.Float(), nullable=False)
 
+    def __init__(self, crystal_type, origin_planet, rarity_level, force_amplify):
+        self.crystal_type = crystal_type
+        self.origin_planet = origin_planet
+        self.rarity_level = rarity_level
+        self.force_amplify = force_amplify
+
+    def new_crystal_obj():
+        return Crystals('', '', '', '')
+
 
 class CrystalsSchema(ma.Schema):
     crystal_id = ma.fields.UUID()

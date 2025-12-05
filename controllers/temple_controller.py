@@ -5,12 +5,12 @@ from util.reflection import populate_object
 from lib.authenticate import authenticate, require_force_rank
 
 
-@authenticate
-@require_force_rank("Grand Master")
+
 def create_temple():
-    data = request.get_json() or request.form
-    temple = Temples()
-    populate_object(temple, data)
+    post_data = request.form if request.form else request.json
+
+    temple = Temples.new_temple_obj()
+    populate_object(temple, post_data)
 
     try:
         db.session.add(temple)
@@ -47,12 +47,12 @@ def get_all_temples():
 @authenticate
 @require_force_rank("Grand Master")
 def update_temple(temple_id):
-    temple = Temples.query.get(temple_id)
+    post_data = request.form if request.form else request.json
+    temple = db.session.query(Temples).filter(Temples.temple_id == temple_id).first()
     if not temple:
         return jsonify({"message": "temple not found"}), 404
 
-    data = request.get_json() or request.form
-    populate_object(temple, data)
+    populate_object(temple, post_data)
     db.session.commit()
 
     return jsonify({"message": "temple updated", "temple": temple_schema.dump(temple)}), 200

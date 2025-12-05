@@ -14,6 +14,14 @@ class Species(db.Model):
     forse_sensitive = db.Column(db.Boolean(), nullable=False)
     avg_lifespan = db.Column(db.Integer(), nullable=False)
 
+    def __init__(self, species_name, homeworld, forse_sensitive, avg_lifespan):
+        self.species_name = species_name
+        self.homeworld = homeworld
+        self.forse_sensitive = forse_sensitive
+        self.avg_lifespan = avg_lifespan
+
+    def new_species_obj():
+        return Species('', '', False, 0)
 
 class SpeciesSchema(ma.Schema):
     species_id = ma.fields.UUID()

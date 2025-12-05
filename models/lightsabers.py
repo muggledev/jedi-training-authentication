@@ -17,6 +17,17 @@ class Lightsabers(db.Model):
     blade_color = db.Column(db.String(), nullable=False)
     is_completed = db.Column(db.Boolean(), default=False)
 
+    def __init__(self, owner_id, crystal_id, saber_name, hilt_material, blade_color, is_completed):
+        self.owner_id = owner_id
+        self.crystal_id = crystal_id
+        self.saber_name = saber_name
+        self.hilt_material = hilt_material
+        self.blade_color = blade_color
+        self.is_completed = is_completed
+
+    def new_lightsaber_obj():
+        return Lightsabers('', '', '', '', '', False)
+
 
 class LightsabersSchema(ma.Schema):
     saber_id = ma.fields.UUID()

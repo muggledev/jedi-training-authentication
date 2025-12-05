@@ -19,6 +19,18 @@ class Padawans(db.Model):
     training_level = db.Column(db.Integer(), nullable=False)
     graduation_date = db.Column(db.DateTime())
 
+    def __init__(self, master_id, user_id, species_id, padawan_name, age, training_level, graduation_date):
+        self.master_id = master_id
+        self.user_id = user_id
+        self.species_id = species_id
+        self.padawan_name = padawan_name
+        self.age = age
+        self.training_level = training_level
+        self.graduation_date =graduation_date
+
+    def new_padawan_obj():
+        return Padawans('', '', '', '', 0, 0, '')
+
 
 class PadawanSchema(ma.Schema):
     padawan_id = ma.fields.UUID()

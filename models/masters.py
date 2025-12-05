@@ -16,6 +16,16 @@ class Masters(db.Model):
     years_training = db.Column(db.Integer(), nullable=False)
     max_padawans = db.Column(db.Integer(), nullable=False)
 
+    def __init__(self, user_id, master_name, specialization, years_training, max_padawans):
+        self.user_id = user_id
+        self.master_name = master_name
+        self.specialization = specialization
+        self.years_training = years_training
+        self.max_padawans = max_padawans
+
+    def new_master_obj():
+        return Masters('', '', '', 0, 0)
+
 
 class MastersSchema(ma.Schema):
     master_id = ma.fields.UUID()

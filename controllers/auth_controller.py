@@ -1,55 +1,52 @@
-from flask import request, jsonify
+from flask import jsonify, request
 from flask_bcrypt import check_password_hash
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+
 from db import db
-from models.users import Users
 from models.auth_tokens import AuthTokens, auth_token_schema
-import uuid
+from models.users import Users
+from lib.authenticate import authenticate_return_auth
 
 
-FORCE_RANK_DURATION_MAP = {
-    "Youngling": "TOKEN_EXPIRATION_YOUNGLING",
-    "Padawan": "TOKEN_EXPIRATION_PADAWAN",
-    "Knight": "TOKEN_EXPIRATION_KNIGHT",
-    "Master": "TOKEN_EXPIRATION_MASTER",
-    "Council": "TOKEN_EXPIRATION_COUNCIL",
-    "Grand Master": "TOKEN_EXPIRATION_GRAND_MASTER"
-}
-
-
-def authenticate_user():
-    data = request.get_json(silent=True) or request.form
-    email = data.get("email")
-    password = data.get("password")
+def create_auth_token():
+    post_data = request.form if request.form else request.json
+    email = post_data.get('email')
+    password = post_data.get('password')
 
     if not email or not password:
-        return jsonify({"message": "email and password required"}), 400
+        return jsonify({"message": "invalid login"}), 401
+    
+    now_datetime = datetime.now()
+    expiration_datetime = now_datetime + timedelta(hours=12)
+    user_query = db.session.query(Users).filter(Users.email == email).first()
 
-    user = Users.query.filter_by(email=email).first()
+    if user_query:
+        user_id = user_query.user_id
+        is_password_valid = check_password_hash(user_query.password, password)
+        if is_password_valid==False:
+            return jsonify({"message": "invalid password"}), 401
+    existing_tokens = db.session.query(AuthTokens).filter(AuthTokens.user_id == user_id).all()
 
-    print("Login attempt:", email)
-    print("User found:", bool(user))
+    if existing_tokens:
+        for token in existing_tokens:
+            if token.expiration < now_datetime:
+                db.session.delete(token)
+    new_token = AuthTokens(user_id, expiration_datetime)
 
-    if not user or not check_password_hash(user.password, password):
-        print("Password match:", user and check_password_hash(user.password, password))
-        return jsonify({"message": "invalid credentials"}), 401
+    try:
+        db.session.add(new_token)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        return jsonify({"message": "unable to create record"}), 400
+    return jsonify({"message": "auth success", "auth_info": auth_token_schema.dump(new_token)}), 201
 
-    config_key = FORCE_RANK_DURATION_MAP.get(user.force_rank)
-    duration_seconds = int(request.app.config.get(config_key, 3600))
-
-    expiration = datetime.now(timezone.utc) + timedelta(seconds=duration_seconds)
-
-    token = AuthTokens(
-        auth_token=uuid.uuid4(),
-        user_id=user.user_id,
-        expiration_date=expiration
-    )
-
-    db.session.add(token)
-    db.session.commit()
-
-    return jsonify({
-        "message": "login successful",
-        "token": auth_token_schema.dump(token)
-    }), 200
-
+@authenticate_return_auth
+def auth_token_delete(auth_info):
+    try:
+        db.session.delete(auth_info)
+        db.session.commit()
+        return jsonify({"message": "logout successful"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify ({"message": "unable to logout"}), 400

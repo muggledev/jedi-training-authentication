@@ -17,6 +17,16 @@ class Temples(db.Model):
 
     is_active = db.Column(db.Boolean(), default=True)
 
+    def __init__(self, temple_name, planet, master_count, padawan_limit, is_active):
+        self.temple_name = temple_name
+        self.planet = planet
+        self.master_count = master_count
+        self.padawan_limit = padawan_limit
+        self.is_active = is_active
+
+    def new_temple_obj():
+        return Temples('', '', 0, 0, True)
+
 
 class TemplesSchema(ma.Schema):
     temple_id = ma.fields.UUID()

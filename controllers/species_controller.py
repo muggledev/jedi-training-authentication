@@ -8,9 +8,10 @@ from lib.authenticate import authenticate, require_force_rank
 @authenticate
 @require_force_rank("Master")
 def create_species():
-    data = request.get_json() or request.form
-    species = Species()
-    populate_object(species, data)
+    post_data = request.form if request.form else request.json
+
+    species = Species.new_species_obj()
+    populate_object(species, post_data)
 
     try:
         db.session.add(species)
@@ -40,12 +41,12 @@ def get_all_species():
 @authenticate
 @require_force_rank("Master")
 def update_species(species_id):
-    species = Species.query.get(species_id)
+    post_data = request.form if request.form else request.json
+    species = db.session.query(Species).filter(Species.species_id == species_id).first()
     if not species:
         return jsonify({"message": "species not found"}), 404
 
-    data = request.get_json() or request.form
-    populate_object(species, data)
+    populate_object(species, post_data)
     db.session.commit()
 
     return jsonify({"message": "species updated", "species": species_schema.dump(species)}), 200

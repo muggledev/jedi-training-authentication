@@ -5,4 +5,4 @@ auth = Blueprint("auth", __name__)
 
 @auth.route("/user/auth", methods=["POST"])
 def login_route():
-    return controllers.authenticate_user()
+    return controllers.create_auth_token()

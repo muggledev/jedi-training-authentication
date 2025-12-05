@@ -8,10 +8,10 @@ from lib.authenticate import authenticate, require_force_rank
 @authenticate
 @require_force_rank("Council")
 def create_master():
-    data = request.get_json() or request.form
+    post_data = request.form if request.form else request.json
 
-    master = Masters()
-    populate_object(master, data)
+    master = Masters.new_master_obj()
+    populate_object(master, post_data)
 
     try:
         db.session.add(master)
@@ -40,15 +40,15 @@ def get_master(master_id):
 
 @authenticate
 def update_master(master_id):
-    master = Masters.query.get(master_id)
+    post_data = request.form if request.form else request.json
+    master = db.session.query(Masters).filter(Masters.master_id == master_id).first()
     if not master:
         return jsonify({"message": "master not found"}), 404
 
     if str(request.user.user_id) != str(master.user_id) and request.user.force_rank not in ["Council", "Grand Master"]:
         return jsonify({"message": "not authorized"}), 403
 
-    data = request.get_json() or request.form
-    populate_object(master, data)
+    populate_object(master, post_data)
     db.session.commit()
 
     return jsonify({"message": "master updated", "master": master_schema.dump(master)}), 200

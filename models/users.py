@@ -23,6 +23,19 @@ class Users(db.Model):
     is_active = db.Column(db.Boolean(), default=True)
     joined_date = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
+    def __init__(self, temple_id, username, email, password, force_rank, midi_count, is_active, joined_date):
+        self.temple_id = temple_id
+        self.username = username
+        self.email = email
+        self.password = password
+        self.force_rank = force_rank
+        self.midi_count = midi_count
+        self.is_active = is_active
+        self.joined_date = joined_date
+
+    def new_user_obj():
+        return Users('', '', '', '', '', 0, True, '')
+
 
 class UsersSchema(ma.Schema):
     user_id = ma.fields.UUID()

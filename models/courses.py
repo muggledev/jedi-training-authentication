@@ -16,6 +16,16 @@ class Courses(db.Model):
     duration_weeks = db.Column(db.Integer(), nullable=False)
     max_students = db.Column(db.Integer(), nullable=False)
 
+    def __init__(self, instructor_id, course_name, difficulty, duration_weeks, max_students):
+        self.instructor_id = instructor_id
+        self.course_name = course_name
+        self.difficulty = difficulty
+        self.duration_weeks = duration_weeks
+        self.max_students = max_students
+
+    def new_course_obj():
+        return Courses('', '', '', 0, 0)
+
 
 class CoursesSchema(ma.Schema):
     course_id = ma.fields.UUID()

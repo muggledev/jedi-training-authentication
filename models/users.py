@@ -38,6 +38,8 @@ class Users(db.Model):
 
 
 class UsersSchema(ma.Schema):
+    class Meta:
+        fields = ['user_id', 'temple_id', 'username', 'email', 'force_rank', 'midi_count', 'is_active', 'joined_date']
     user_id = ma.fields.UUID()
     temple_id = ma.fields.UUID()
     username = ma.fields.Str()

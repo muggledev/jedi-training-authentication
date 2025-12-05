@@ -30,6 +30,8 @@ class Lightsabers(db.Model):
 
 
 class LightsabersSchema(ma.Schema):
+    class Meta:
+        fields = ['saber_id', 'owner_id', 'crystal_id', 'saber_name', 'hilt_material', 'blade_color', 'is_completed']
     saber_id = ma.fields.UUID()
     owner_id = ma.fields.UUID()
     crystal_id = ma.fields.UUID()

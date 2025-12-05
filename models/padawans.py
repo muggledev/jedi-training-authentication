@@ -33,6 +33,8 @@ class Padawans(db.Model):
 
 
 class PadawanSchema(ma.Schema):
+    class Meta:
+        fields = ['padawan_id', 'master_id', 'user_id', 'species_id', 'padawan_name', 'age', 'training_level', 'graduation_date']
     padawan_id = ma.fields.UUID()
     master_id = ma.fields.UUID()
     user_id = ma.fields.UUID()

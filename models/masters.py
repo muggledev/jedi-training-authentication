@@ -28,6 +28,8 @@ class Masters(db.Model):
 
 
 class MastersSchema(ma.Schema):
+    class Meta:
+        fields = ['master_id', 'user_id', 'master_name', 'specialization', 'years_training', 'max_padawans']
     master_id = ma.fields.UUID()
     user_id = ma.fields.UUID()
     master_name = ma.fields.Str()

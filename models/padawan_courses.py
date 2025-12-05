@@ -17,6 +17,8 @@ class PadawanCourses(db.Model):
 
 
 class PadawanCoursesSchema(ma.Schema):
+    class Meta:
+        fields = ['padawan_id', 'course_id', 'enrollment_date', 'completion_date', 'final_score']
     padawan_id = ma.fields.UUID()
     course_id = ma.fields.UUID()
     enrollment_date = ma.fields.DateTime()

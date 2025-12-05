@@ -29,6 +29,8 @@ class Temples(db.Model):
 
 
 class TemplesSchema(ma.Schema):
+    class Meta:
+        fields = ['temple_id', 'temple_name', 'planet', 'master_count', 'padawan_limit', 'is_active']
     temple_id = ma.fields.UUID()
     temple_name = ma.fields.Str()
     planet = ma.fields.Str()

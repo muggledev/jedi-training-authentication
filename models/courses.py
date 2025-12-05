@@ -28,6 +28,8 @@ class Courses(db.Model):
 
 
 class CoursesSchema(ma.Schema):
+    class Meta:
+        fields = ['course_id', 'instructor_id', 'course_name', 'difficulty', 'duration_weeks', 'max_students']
     course_id = ma.fields.UUID()
     instructor_id = ma.fields.UUID()
     course_name = ma.fields.Str()

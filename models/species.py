@@ -24,6 +24,8 @@ class Species(db.Model):
         return Species('', '', False, 0)
 
 class SpeciesSchema(ma.Schema):
+    class Meta:
+        fields = ['species_id', 'species_name', 'homeworld', 'forse_sensitive', 'avg_lifespan']
     species_id = ma.fields.UUID()
     species_name = ma.fields.Str()
     homeworld = ma.fields.Str()

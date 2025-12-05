@@ -25,6 +25,8 @@ class Crystals(db.Model):
 
 
 class CrystalsSchema(ma.Schema):
+    class Meta:
+        fields = ['crystal_id', 'crystal_type', 'origin_planet', 'rarity_level', 'force_amplify']
     crystal_id = ma.fields.UUID()
     crystal_type = ma.fields.Str()
     origin_planet = ma.fields.Str()

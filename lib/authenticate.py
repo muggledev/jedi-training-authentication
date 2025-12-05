@@ -36,7 +36,6 @@ def validate_token():
     if not validate_uuid4(token):
         return False
 
-    token_uuid = uuid.UUID(token)
     existing_token = AuthTokens.query.filter_by(auth_token=token).first()
     if not existing_token:
         return False

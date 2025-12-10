@@ -27,7 +27,7 @@ def validate_uuid4(uuid_string):
 
 
 def validate_token():
-    header = request.headers.get("Authorization")
+    header = request.headers.get("auth")
     if not header:
         return False
 
@@ -40,7 +40,7 @@ def validate_token():
     if not existing_token:
         return False
 
-    if existing_token.expiration_date > datetime.now(timezone.utc):
+    if existing_token.expiration > datetime.now():
         return existing_token
 
     return False
@@ -51,22 +51,30 @@ def fail_response():
 
 
 def authenticate(func):
-    """Simple decorator, only checks the token."""
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper_authenticate(*args, **kwargs):
         auth_info = validate_token()
-        return func(*args, **kwargs) if auth_info else fail_response()
-    return wrapper
+        if not auth_info:
+            return fail_response()
+
+        request.user = Users.query.get(auth_info.user_id)
+        if not request.user:
+            return jsonify({"message": "User not found"}), 401
+
+        return func(*args, **kwargs)
+
+    return wrapper_authenticate
 
 
 def authenticate_return_auth(func):
-    """Decorator that injects auth_info into route args."""
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper_authenticate(*args, **kwargs):
         auth_info = validate_token()
-        kwargs["auth_info"] = auth_info
-        return func(*args, **kwargs) if auth_info else fail_response()
-    return wrapper
+        kwargs['auth_info'] = auth_info
+        return (
+            func(*args, **kwargs) if auth_info else fail_response()
+        )
+    return wrapper_authenticate
 
 
 def require_force_rank(min_rank):

@@ -58,8 +58,6 @@ def update_temple(temple_id):
     return jsonify({"message": "temple updated", "temple": temple_schema.dump(temple)}), 200
 
 
-@authenticate
-@require_force_rank("Grand Master")
 def delete_temple(temple_id):
     temple = Temples.query.get(temple_id)
     if not temple:

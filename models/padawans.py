@@ -29,7 +29,7 @@ class Padawans(db.Model):
         self.graduation_date =graduation_date
 
     def new_padawan_obj():
-        return Padawans('', '', '', '', 0, 0, '')
+        return Padawans(None, None, None, '', 0, 0, None)
 
 
 class PadawanSchema(ma.Schema):

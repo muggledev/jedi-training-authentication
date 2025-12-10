@@ -25,7 +25,7 @@ def enroll_padawan():
 
 @authenticate
 @require_force_rank("Master")
-def get_all_enrollments(auth_info):
+def get_all_enrollments():
     enrollments = PadawanCourses.query.all()
     return jsonify({"enrollments": enrollment_list_schema.dump(enrollments)}), 200
 
